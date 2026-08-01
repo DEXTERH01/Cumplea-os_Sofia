@@ -1,0 +1,42 @@
+CÓMO AGREGAR LAS 3 FOTOS DE SOPHIA
+-----------------------------------
+1. Ubica tus 3 fotos y renómbralas exactamente así:
+   sophia-1.jpg
+   sophia-2.jpg
+   sophia-3.jpg
+2. Colócalas dentro de la carpeta "img" (reemplazando lo que haya).
+3. Si tus fotos no son .jpg (por ejemplo .png), cambia también la
+   extensión dentro de index.html donde dice src="img/sophia-1.jpg", etc.
+
+Si no agregas las fotos, la página igual se ve bien: cada marco
+mostrará un espacio decorado con una corona hasta que subas la imagen.
+
+CÓMO AGREGAR LA MÚSICA DE FONDO
+---------------------------------
+1. Consigue un archivo de audio en formato .mp3 que tengas derecho a
+   usar (por ejemplo una canción instrumental libre de derechos, o
+   una que hayan grabado/comprado ustedes). No se puede usar música
+   de Disney u otra música con derechos de autor sin permiso.
+2. Renómbralo exactamente: musica-fiesta.mp3
+3. Crea una carpeta llamada "audio" al mismo nivel que index.html y
+   coloca el archivo ahí (quedaría: sophia-invitation/audio/musica-fiesta.mp3)
+4. Listo: al abrir la página aparece "Toca para entrar al reino"; al
+   tocar, empieza la música automáticamente. Hay un botoncito 🎵
+   abajo a la derecha para silenciarla o volver a activarla.
+
+Si no agregas el archivo de audio, la pantalla de entrada funciona
+igual (se abre la invitación), solo que no sonará música.
+
+CÓMO PUBLICAR EN NETLIFY
+-------------------------
+1. Ve a https://app.netlify.com
+2. Arrastra esta carpeta completa (sophia-invitation) al área que dice
+   "Drag and drop your site output folder here" (Netlify Drop).
+3. En segundos te dará un enlace tipo https://algo-al-azar.netlify.app
+4. Opcional: en Site settings > Change site name puedes ponerle algo
+   como "sophia-cumple-1" para un link más lindo:
+   https://sophia-cumple-1.netlify.app
+5. Comparte ese enlace con los hermanos de la iglesia por WhatsApp.
+
+Nada más que configurar: es un sitio estático, no necesita build ni
+comandos.
