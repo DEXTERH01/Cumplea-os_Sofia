@@ -633,8 +633,58 @@
      CONFETTI
   ========================================= */
   .confetti-piece {
-    position: fixed; top: 0; left: 0; width: 8px; height: 8px; z-index: 9999;
+    position: fixed; top: 0; left: 0; z-index: 9999;
     pointer-events: none; border-radius: 2px;
+  }
+
+  /* =========================================
+     AMBIENT FLOATING BALLOONS
+  ========================================= */
+  .float-balloon {
+    position: absolute;
+    pointer-events: none;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    opacity: 0;
+    animation: rise-balloon linear infinite;
+    z-index: 1;
+    user-select: none;
+  }
+  @keyframes rise-balloon {
+    0%   { opacity: 0; transform: translateY(0) rotate(-8deg) scale(.8); }
+    8%   { opacity: .85; }
+    50%  { transform: translateY(-45vh) rotate(8deg) scale(1); opacity: .7; }
+    92%  { opacity: .4; }
+    100% { opacity: 0; transform: translateY(-95vh) rotate(-5deg) scale(.9); }
+  }
+  .intro-deco-wrap {
+    position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+  }
+  .intro-star {
+    position: absolute; pointer-events: none;
+    font-size: clamp(.9rem, 2.5vw, 1.4rem);
+    opacity: 0;
+    animation: star-float ease-in-out infinite;
+  }
+  @keyframes star-float {
+    0%,100% { opacity: 0; transform: translateY(0) scale(.5) rotate(0deg); }
+    20%     { opacity: 1; }
+    50%     { opacity: .8; transform: translateY(-20px) scale(1.1) rotate(20deg); }
+    80%     { opacity: .3; }
+  }
+  .page-balloon {
+    position: fixed;
+    pointer-events: none;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    opacity: 0;
+    z-index: 0;
+    animation: page-rise linear infinite;
+    bottom: -80px;
+  }
+  @keyframes page-rise {
+    0%   { opacity: 0; transform: translateX(0) rotate(-5deg); }
+    10%  { opacity: .55; }
+    80%  { opacity: .4; }
+    100% { opacity: 0; transform: translateX(var(--drift, 30px)) rotate(5deg) translateY(-110vh); }
   }
 
   /* =========================================
@@ -683,6 +733,9 @@
 
 <!-- ================= INTRO / ENTRADA ================= -->
 <div id="introOverlay">
+  <!-- Decoraciones flotantes del intro -->
+  <div class="intro-deco-wrap" id="introDeco"></div>
+
   <div class="intro-cameo">
     <div class="intro-cameo-ring">
       <div class="intro-cameo-inner">
@@ -693,8 +746,7 @@
   </div>
   <p class="intro-sub">Un pequeño reino te espera</p>
   <h1>Sophia cumple 1 añito</h1>
-  <button class="enter-btn" id="enterBtn">👑 Toca para entrar al reino</button>
-  <p class="hint">♪ Se reproducirá música al ingresar ♪</p>
+  <button class="enter-btn" id="enterBtn">✨ Toca para entrar al reino ✨</button>
 </div>
 
 <!-- ================= MUSIC TOGGLE ================= -->
@@ -995,30 +1047,120 @@ document.addEventListener('keydown', e => {
   if(e.key === 'Escape') document.getElementById('lightbox').classList.remove('show');
 });
 
-// ---------- balloons: pop + confetti ----------
+// ---------- globos ambientales flotando en la página ----------
 (function(){
-  const colors = ['#8451A8','#F5A9C4','#D4962A','#C9A0DC','#5B2C83','#F4D793'];
+  const emojis = ['🎈','🎀','⭐','💜','✨','🌸','💛','🎊'];
+  let active = 0;
+  function spawnPageBalloon(){
+    if(active > 6) return;
+    active++;
+    const el = document.createElement('div');
+    el.className = 'page-balloon';
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    const left = 5 + Math.random() * 90;
+    const drift = (Math.random() - .5) * 80;
+    const dur = 7000 + Math.random() * 8000;
+    const delay = Math.random() * 2000;
+    el.style.cssText = `left:${left}%;font-size:${1.6 + Math.random()*1.4}rem;--drift:${drift}px;animation-duration:${dur}ms;animation-delay:${delay}ms;`;
+    document.body.appendChild(el);
+    setTimeout(() => { el.remove(); active--; }, dur + delay + 500);
+  }
+  setInterval(spawnPageBalloon, 2200);
+  setTimeout(() => { spawnPageBalloon(); spawnPageBalloon(); }, 1000);
+})();
+
+// ---------- decoraciones animadas del intro ----------
+(function(){
+  const wrap = document.getElementById('introDeco');
+  if(!wrap) return;
+  const intros = ['🎈','🌟','💜','✨','🎀','⭐','🌸','💫','👑'];
+  for(let i = 0; i < 14; i++){
+    const el = document.createElement('div');
+    const isBalloon = i % 3 === 0;
+    el.className = isBalloon ? 'float-balloon' : 'intro-star';
+    el.textContent = intros[Math.floor(Math.random() * intros.length)];
+    const left = 2 + Math.random() * 96;
+    const top = isBalloon ? (50 + Math.random() * 45) : (Math.random() * 90);
+    const dur = (isBalloon ? (8 + Math.random() * 8) : (3 + Math.random() * 4));
+    el.style.cssText = `left:${left}%;top:${top}%;font-size:${.9 + Math.random()*1.4}rem;animation-duration:${dur}s;animation-delay:${-Math.random()*dur}s;`;
+    wrap.appendChild(el);
+  }
+})();
+
+// ---------- balloons: pop épico + confetti + emojis ----------
+(function(){
+  const colors = ['#8451A8','#F5A9C4','#D4962A','#C9A0DC','#5B2C83','#F4D793','#FF8FAB','#FFD700'];
+  const emojiPop = ['💜','⭐','🌸','✨','💛','🎉','🎀','💫','👑'];
+
   function confettiBurst(x, y){
-    const n = window.innerWidth < 560 ? 14 : 24;
-    for(let i = 0; i < n; i++){
+    const isMobile = window.innerWidth < 560;
+    const nConfetti = isMobile ? 28 : 48;
+    const nEmoji = isMobile ? 5 : 8;
+
+    // partículas de confetti
+    for(let i = 0; i < nConfetti; i++){
       const p = document.createElement('div');
       p.className = 'confetti-piece';
-      p.style.background = colors[Math.floor(Math.random() * colors.length)];
-      p.style.left = x + 'px'; p.style.top = y + 'px';
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const size = 5 + Math.random() * 9;
+      const isCircle = Math.random() > .5;
+      p.style.cssText = `
+        left:${x}px; top:${y}px;
+        width:${size}px; height:${size}px;
+        background:${color};
+        border-radius:${isCircle ? '50%' : '2px'};
+      `;
       const angle = Math.random() * Math.PI * 2;
-      const dist = 60 + Math.random() * 100;
+      const dist = 80 + Math.random() * 140;
       const dx = Math.cos(angle) * dist;
-      const dy = Math.sin(angle) * dist - 50;
-      const rot = Math.random() * 400;
-      const size = 6 + Math.random() * 6;
-      p.style.width = size + 'px'; p.style.height = size + 'px';
+      const dy = Math.sin(angle) * dist - 60;
+      const rot = (Math.random() - .5) * 720;
+      const dur = 800 + Math.random() * 700;
       p.animate([
-        { transform: 'translate(0,0) rotate(0deg)', opacity: 1 },
-        { transform: `translate(${dx}px, ${dy + 180}px) rotate(${rot}deg)`, opacity: 0 }
-      ], { duration: 900 + Math.random() * 500, easing: 'cubic-bezier(.2,.8,.2,1)' });
+        { transform: `translate(0,0) rotate(0deg) scale(1)`, opacity: 1 },
+        { transform: `translate(${dx}px, ${dy + 200}px) rotate(${rot}deg) scale(.3)`, opacity: 0 }
+      ], { duration: dur, easing: 'cubic-bezier(.17,.67,.35,.98)' });
       document.body.appendChild(p);
-      setTimeout(() => p.remove(), 1500);
+      setTimeout(() => p.remove(), dur + 100);
     }
+
+    // emojis volando
+    for(let i = 0; i < nEmoji; i++){
+      const e = document.createElement('div');
+      e.style.cssText = `
+        position:fixed; left:${x}px; top:${y}px; z-index:9999;
+        pointer-events:none; font-size:${1.2 + Math.random()*1.2}rem;
+        user-select:none;
+      `;
+      e.textContent = emojiPop[Math.floor(Math.random() * emojiPop.length)];
+      const angle = (Math.PI * 1.5) + (Math.random() - .5) * Math.PI;
+      const dist = 60 + Math.random() * 110;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist;
+      const dur = 900 + Math.random() * 500;
+      e.animate([
+        { transform: `translate(0,0) scale(0)`, opacity: 0 },
+        { transform: `translate(${dx*.2}px, ${dy*.2}px) scale(1.4)`, opacity: 1, offset: .15 },
+        { transform: `translate(${dx}px, ${dy}px) scale(.8)`, opacity: 0 }
+      ], { duration: dur, easing: 'ease-out' });
+      document.body.appendChild(e);
+      setTimeout(() => e.remove(), dur + 100);
+    }
+
+    // onda de expansión
+    const ring = document.createElement('div');
+    ring.style.cssText = `
+      position:fixed; left:${x}px; top:${y}px; z-index:9998;
+      width:10px; height:10px; border-radius:50%;
+      border:3px solid var(--gold); pointer-events:none;
+      transform:translate(-50%,-50%);
+    `;
+    ring.animate([
+      { transform:'translate(-50%,-50%) scale(0)', opacity:1 },
+      { transform:'translate(-50%,-50%) scale(12)', opacity:0 }
+    ], { duration:600, easing:'ease-out' });
+    document.body.appendChild(ring);
+    setTimeout(() => ring.remove(), 700);
   }
 
   document.querySelectorAll('.balloon-unit').forEach(unit => {
@@ -1027,7 +1169,7 @@ document.addEventListener('keydown', e => {
       const rect = unit.querySelector('.balloon').getBoundingClientRect();
       confettiBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
       unit.classList.add('popped');
-      setTimeout(() => unit.classList.remove('popped'), 2800);
+      setTimeout(() => unit.classList.remove('popped'), 3000);
     });
   });
 })();
